@@ -45,26 +45,23 @@ void network::withSparseTrain(mat sample,mat result,int rs1,int rs2)
     mat rdmat1,rdmat2,rdmat3;
     rdmat1=w1;
     rdmat1.randu();
-    rdmat1=(2*rdmat1-1)/RND_SCALAR_RADIO;
+    rdmat1=(2*rdmat1-1)*RND_SCALAR_RADIO;
     w1=w1+rdmat1;
 
     rdmat2=w2;
     rdmat2.randu();
-    rdmat2=(2*rdmat2-1)/RND_SCALAR_RADIO;
+    rdmat2=(2*rdmat2-1)*RND_SCALAR_RADIO;
     w2=w2+rdmat2;
 
     rdmat3=w3;
     rdmat3.randu();
-    rdmat3=(2*rdmat3-1)/RND_SCALAR_RADIO;
+    rdmat3=(2*rdmat3-1)*RND_SCALAR_RADIO;
     w3=w3+rdmat3;
 
     //偏置修改
     o1=o1-sum(e1)/sample.n_rows;
     o2=o2-sum(e2)/sample.n_rows;
     o3=o3-sum(e3)/sample.n_rows;
-
-//    updateOutput(sample);
-//    error2=result-output;
 }
 
 network::network(string pre)
@@ -113,7 +110,7 @@ network::network(int l1,int l2)
     w2=mat(ln1,ln2);
     w2.randu();
     w2=1-2*w2;
-    w2=w2/scalarRadio;
+    w2=w2*scalarRadio;
 
     wk2=w2;
     wp2=w2;
@@ -123,12 +120,12 @@ network::network(int l1,int l2)
     o1=rowvec(1,ln1);
     o1.randu();
     o1=1-2*o1;
-    o1=o1/scalarRadio;
+    o1=o1*scalarRadio;
 
     o2=rowvec(1,ln2);
     o2.randu();
     o2=1-2*o2;
-    o2=o2/scalarRadio;
+    o2=o2*scalarRadio;
 
     lr=LEARNING_RATE;
 }
@@ -155,15 +152,15 @@ void network::setVec(int in,int out)
     w3.randu();
 
     w1=1-2*w1;
-    w1=w1/scalarRadio;
+    w1=w1*scalarRadio;
 
     w2=1-2*w2;
-    w2=w2/scalarRadio;
+    w2=w2*scalarRadio;
 
     o3=rowvec(1,out_vec);
     o3.randu();
     o3=1-2*o3;
-    o3=o3/scalarRadio;
+    o3=o3*scalarRadio;
 }
 
 mat network::sigmoid(mat x)
@@ -236,17 +233,17 @@ void network::simplyBPTrain(mat sample,mat result)
     mat rdmat1,rdmat2,rdmat3;
     rdmat1=w1;
     rdmat1.randu();
-    rdmat1=(2*rdmat1-1)/RND_SCALAR_RADIO;
+    rdmat1=(2*rdmat1-1)*RND_SCALAR_RADIO;
     w1=w1+rdmat1;
 
     rdmat2=w2;
     rdmat2.randu();
-    rdmat2=(2*rdmat2-1)/RND_SCALAR_RADIO;
+    rdmat2=(2*rdmat2-1)*RND_SCALAR_RADIO;
     w2=w2+rdmat2;
 
     rdmat3=w3;
     rdmat3.randu();
-    rdmat3=(2*rdmat3-1)/RND_SCALAR_RADIO;
+    rdmat3=(2*rdmat3-1)*RND_SCALAR_RADIO;
     w3=w3+rdmat3;
 
     //偏置修改
@@ -282,17 +279,17 @@ void network::withMomentumTrain(mat sample,mat result)
     mat rdmat1,rdmat2,rdmat3;
     rdmat1=w1;
     rdmat1.randu();
-    rdmat1=(2*rdmat1-1)/RND_SCALAR_RADIO;
+    rdmat1=(2*rdmat1-1)*RND_SCALAR_RADIO;
     w1=w1+rdmat1;
 
     rdmat2=w2;
     rdmat2.randu();
-    rdmat2=(2*rdmat2-1)/RND_SCALAR_RADIO;
+    rdmat2=(2*rdmat2-1)*RND_SCALAR_RADIO;
     w2=w2+rdmat2;
 
     rdmat3=w3;
     rdmat3.randu();
-    rdmat3=(2*rdmat3-1)/RND_SCALAR_RADIO;
+    rdmat3=(2*rdmat3-1)*RND_SCALAR_RADIO;
     w3=w3+rdmat3;
 
     //偏置修改

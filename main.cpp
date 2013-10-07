@@ -10,10 +10,10 @@ int main()
     srand((unsigned int)time(NULL));
 //    network nets(10,10);
 //    nets.setVec(103,9);
-    network nets("after/cell");
+    network nets("before/cell");
     mat dataset;
     dataset.load("deal_dataset.dat",raw_ascii);
-    nets.datasetBatTrain(dataset,BP_WITH_MOM,3000,500);
-    nets.save("before/cell");
+    nets.datasetBatTrain(dataset,BP_NONE,10000,500);
+    nets.save("after/cell");
     return 0;
 }

@@ -1,7 +1,7 @@
 #ifndef COMMON_H_INCLUDED
 #define COMMON_H_INCLUDED
 #define OUT_OF_RANGE 255
-#define LEARNING_RATE 0.2
+#define LEARNING_RATE 0.01
 #define LAMUDA 0
 #define ALAPA -0.9
 #define TOR_ERROR 0.001
@@ -15,5 +15,5 @@
 #define SPARSE_PARA 0.9
 #define SAVE_FORM raw_ascii
 //随机扰动尺度
-#define RND_SCALAR_RADIO 10000
+#define RND_SCALAR_RADIO 0.0001
 #endif // COMMON_H_INCLUDED
