@@ -4,7 +4,7 @@
 #define LEARNING_RATE 0.01
 #define LAMUDA 0
 #define ALAPA -0.9
-#define TOR_ERROR 0.001
+#define TOR_ERROR 0.03
 #define scalarRadio 1
 //训练类型
 #define BP_NONE 1
@@ -15,5 +15,5 @@
 #define SPARSE_PARA 0.9
 #define SAVE_FORM raw_ascii
 //随机扰动尺度
-#define RND_SCALAR_RADIO 0.0001
+#define RND_SCALAR_RADIO 0
 #endif // COMMON_H_INCLUDED

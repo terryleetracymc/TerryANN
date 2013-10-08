@@ -11,6 +11,12 @@ using namespace arma;
 class network
 {
 public:
+    //训练中最小的一次误差
+    float min_error;
+    //最小误差矩阵
+    mat mw1,mw2,mw3;
+    //最小误差偏执
+    rowvec mo1,mo2,mo3;
     //学习率（learning rate），动量系数（momentum coefficient）
     float lr;
     //该网络的信息,分别记录输入/输出/三层细胞的维数
@@ -47,10 +53,6 @@ public:
     mat error1,error2;
     //导数
     mat delta1,delta2,delta3;
-    //训练过程中误差最小的矩阵
-    mat mw1,mw2,mw3;
-    //训练过程中误差最小的偏置
-    rowvec mo1,mo2,mo3;
     //带动量的神经网络训练，如果单样本在线训练，单纯的BP神经网络训练
     void withMomentumTrain(mat sample,mat result);
     //样本训练，如果是多样本就批训练，如果单样本在线训练，单纯的BP神经网络训练

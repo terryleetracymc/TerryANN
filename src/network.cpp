@@ -24,11 +24,11 @@ void network::withSparseTrain(mat sample,mat result,int rs1,int rs2)
     e3=-(result-output)%output%(1-output);
     //隐藏层加入稀疏性
     e2=e3*w3.t();
-    e2.each_row()+=ar2;//SPARSE_PARA*(-ROUP/r2+(1-ROUP)/(1-r2));
+    e2.each_row()+=ar2;
     e2=e2%h2%(1-h2);
 
     e1=e2*w2.t();
-    e1.each_row()+=ar1;//SPARSE_PARA*(-ROUP/r1+(1-ROUP)/(1-r1));
+    e1.each_row()+=ar1;
     e1=e1%h1%(1-h1);
 
     //批梯度
@@ -80,9 +80,9 @@ network::network(string pre)
     o3.load(savePath.c_str(),raw_ascii);
 
     in_vec=w1.n_rows;
-    ln1=w1.n_rows;
-    ln2=w3.n_cols;
-    out_vec=w3.n_rows;
+    ln1=w1.n_cols;
+    ln2=w3.n_rows;
+    out_vec=w3.n_cols;
 
     wk1=w1;
     wp1=w1;
@@ -206,6 +206,20 @@ void network::save(string pre)
     w3.save(savePath.c_str(),SAVE_FORM);
     savePath=pre+"o3.dat";
     o3.save(savePath.c_str(),SAVE_FORM);
+
+    //存储误差最小矩阵
+    savePath=pre+"mw1.dat";
+    w1.save(savePath.c_str(),SAVE_FORM);
+    savePath=pre+"mo1.dat";
+    o1.save(savePath.c_str(),SAVE_FORM);
+    savePath=pre+"mw2.dat";
+    w2.save(savePath.c_str(),SAVE_FORM);
+    savePath=pre+"mo2.dat";
+    o2.save(savePath.c_str(),SAVE_FORM);
+    savePath=pre+"mw3.dat";
+    w3.save(savePath.c_str(),SAVE_FORM);
+    savePath=pre+"mo3.dat";
+    o3.save(savePath.c_str(),SAVE_FORM);
 }
 
 void network::simplyBPTrain(mat sample,mat result)
@@ -313,6 +327,7 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
     double round_error;
     //样本的输入和输出
     mat sample,out;
+    min_error=255;
     int chunks,remain,start,end;
     chunks=dataset.n_rows/bat_size;
     remain=dataset.n_rows%bat_size;
@@ -356,6 +371,16 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
         error2=dataset.cols(in_vec,dataset.n_cols-1)-output;
         round_error=norm(sum(error2%error2/dataset.n_rows),2);
         time++;
+        if(round_error<min_error)
+        {
+            min_error=round_error;
+            mw1=w1;
+            mw2=w2;
+            mw3=w3;
+            mo1=o1;
+            mo2=o2;
+            mo3=o3;
+        }
         cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
         if(round_error<TOR_ERROR)
             break;
@@ -367,6 +392,8 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
     int time=0;
     //上一轮训练下来的误差
     double round_error;
+    //赋值训练最小误差为较大的数
+    min_error=255;
     //样本的输入和输出
     rowvec sample,out;
     while(time<MAX_TRAINNING_TIME)
@@ -393,8 +420,20 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
         error2=dataset.cols(in_vec,dataset.n_cols-1)-output;
         round_error=norm(sum(error2%error2/dataset.n_rows),2);
         time++;
-        cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
+        if(round_error<min_error)
+        {
+            min_error=round_error;
+            mw1=w1;
+            mw2=w2;
+            mw3=w3;
+            mo1=o1;
+            mo2=o2;
+            mo3=o3;
+        }
+        if(time%10==0)
+            cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
         if(round_error<TOR_ERROR)
             break;
     }
+    cout<<"本次训练了"<<time<<"次，最小训练误差为"<<min_error<<endl<<"最终训练误差为"<<round_error<<endl;
 }
