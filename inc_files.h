@@ -1,4 +1,3 @@
-#include "common.h"
 #include <armadillo>
 #include <iostream>
 #include <iomanip>
