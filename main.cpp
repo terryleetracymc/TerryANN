@@ -5,22 +5,21 @@ using namespace arma;
 int main()
 {
     srand((unsigned int)time(NULL));
-    int li[4]={3,3,5,3};
-    network net(li);
-    net.initNet();
-    net.lr=0.00009;
-    net.rnd_scale=0.00005;
-    net.sparse_para=0.5;
-    net.roup=0.015;
-    net.rs[2]=2;
-    net.rs[1]=3;
-    for(int i=0;i<1000;i++)
-        net.withSparseTrain(rowvec("0 0.5 0.2"),rowvec("0.5 0.5 0.5"));
-//    net.active(rowvec("0.9 0.5 0.2"));
-//    net.active(rowvec("0 0 0"));
-    net.active(rowvec("0 0.5 0.2"));
-    cout<<net.out[1]<<net.out[2]<<net.out[3];
-    net.save("before/cell");
-//    net.active(rowvec("0.9 0 0.2"));
+//    int layer_info[4]={103,10,10,9};
+//    network nets(layer_info);
+//    nets.initNet();
+//    nets.save("before/cell");
+//    network nets("before/cellm");
+//    nets.lr=0.0001;
+//    nets.tor_error=0.03;
+//    nets.rnd_scale=0.0001;
+//    nets.roup=0.015;
+//    nets.sparse_para=0.8;
+//    mat dataset;
+//    dataset.load("sub_dataset.dat",raw_ascii);
+//    nets.datasetOnLineTrain(dataset,BP_NONE,1000);
+//    nets.save("after/cell");
+    network nets("after/cellm");
+    nets.active(rowvec(""));
     return 0;
 }

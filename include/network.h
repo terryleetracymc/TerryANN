@@ -15,7 +15,7 @@ public:
     double min_error;
     //学习率(learning rate)
     double lr;
-    //一次训练后的输出误差,before_error,after_error
+    //一次训练后的输出误差
     double error;
     //稀疏项参数
     double sparse_para;

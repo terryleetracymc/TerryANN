@@ -71,10 +71,17 @@ void network::save(string pre)
         w[i].save(savePath.c_str(),SAVE_FORM);
         savePath=pre+"o"+tmp+".dat";
         o[i].save(savePath.c_str(),SAVE_FORM);
+
+        savePath=pre+"mw"+tmp+".dat";
+        mw[i].save(savePath.c_str(),SAVE_FORM);
+        savePath=pre+"mo"+tmp+".dat";
+        mo[i].save(savePath.c_str(),SAVE_FORM);
     }
     rowvec netinfo;
     netinfo<<layer_num<<in_vec<<out_vec;
     savePath=pre+"netinfo.dat";
+    netinfo.save(savePath.c_str(),SAVE_FORM);
+    savePath=pre+"mnetinfo.dat";
     netinfo.save(savePath.c_str(),SAVE_FORM);
 }
 
@@ -195,6 +202,9 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
             {
                 withSparseTrain(sample,out);
             }
+            else{
+                return;
+            }
         }
         updateOut(dataset.cols(0,in_vec-1));
         error2=dataset.cols(in_vec,dataset.n_cols-1)-output;
@@ -243,6 +253,9 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
             else if(TRAINNING_TYPE==BP_WITH_SPARSE){
                 withSparseTrain(sample,out);
             }
+            else{
+                return;
+            }
         }
         //剩下的样本训练
         if(remain!=0){
@@ -256,6 +269,9 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
             }
             else if(TRAINNING_TYPE==BP_WITH_SPARSE){
                 withSparseTrain(sample,out);
+            }
+            else{
+                return;
             }
         }
         updateOut(dataset.cols(0,in_vec-1));
