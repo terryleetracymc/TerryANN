@@ -96,6 +96,8 @@ public:
     virtual ~network();
 protected:
 private:
+    //初始化各项数值
+    void initVariables();
 };
 
 #endif // NETWORK_H

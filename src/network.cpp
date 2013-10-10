@@ -5,7 +5,7 @@ network::network(int layer_info[])
     layer_num=0;
     in_vec=layer_info[0];
     ln[0]=layer_info[0];
-    for(int i=1; i<MAX_LAYER; i++)
+    for(int i=1;i<MAX_LAYER;i++)
     {
         //设置为0的话，结束
         if(layer_info[i]==0)
@@ -15,11 +15,23 @@ network::network(int layer_info[])
     }
     out_vec=ln[layer_num];
 }
+//初始化一些参数
+void network::initVariables(){
+    lr=0.9;
+    sparse_para=0.5;
+    roup=0.015;
+    for(int i=0;i<MAX_LAYER;i++)
+    {
+        rs[i]=0;
+    }
+    rnd_scale=0.001;
+    tor_error=0.03;
+}
 
 void network::initNet(double scale)
 {
     //自底向上初始化
-    for(int i=1; i<=layer_num; i++)
+    for(int i=1;i<=layer_num;i++)
     {
         //权值初始化
         w[i]=mat(ln[i-1],ln[i]);
@@ -32,6 +44,7 @@ void network::initNet(double scale)
         o[i]=1-2*o[i];
         o[i]=scale*o[i];
     }
+    initVariables();
 }
 
 void network::updateOut(mat sample)
@@ -61,6 +74,7 @@ mat network::sigmoid(mat x)
 
 void network::save(string pre)
 {
+    //保存两份，另外一份是最小误差训练的权值矩阵和偏置向量
     char tmp[10];
     string savePath;
     for(int i=1; i<=layer_num; i++)
@@ -103,6 +117,7 @@ network::network(string pre) {
         savePath=pre+"o"+tmp+".dat";
         o[i].load(savePath.c_str(),SAVE_FORM);
     }
+    initVariables();
 }
 
 void network::simplyBPTrain(mat sample,mat result)
@@ -157,6 +172,7 @@ void network::withSparseTrain(mat sample,mat result)
         }
         //计算顶层残差
         e[layer_num]=-(result-output)%output%(1-output);
+        //计算隐藏层残差，并加上稀疏惩罚项
         for(int i=layer_num-1;i>=1;i--){
             e[i]=e[i+1]*w[i+1].t();
             e[i].each_row()+=ar[i];
@@ -222,7 +238,10 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
         if(time%10==0)
             cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
         if(round_error<tor_error)
+        {
+            error=round_error;
             break;
+        }
     }
     cout<<"本次训练了"<<time<<"次，最小训练误差为"<<min_error<<endl<<"最终训练误差为"<<round_error<<endl;
 }
@@ -287,13 +306,15 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
                 mo[i]=o[i];
             }
         }
-        cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
+        if(time%10==0)
+            cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
         if(round_error<tor_error)
         {
             error=round_error;
             break;
         }
     }
+    cout<<"本次训练了"<<time<<"次，最小训练误差为"<<min_error<<endl<<"最终训练误差为"<<round_error<<endl;
 }
 
 network::~network()
