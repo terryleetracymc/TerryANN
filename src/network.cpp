@@ -137,14 +137,10 @@ void network::simplyBPTrain(mat sample,mat result)
     {
         delta[i]=out[i-1].t()*e[i]/sample.n_rows;
         w[i]=w[i]-lr*delta[i];
-        //随机扰动
-        rdmat[i]=w[i];
-        rdmat[i].randu();
-        rdmat[i]=(2*rdmat[i]-1)*rnd_scale;
-        w[i]=w[i]+rdmat[i];
         //偏置修改
         o[i]=o[i]-sum(e[i])/sample.n_rows;
     }
+    weightRndChange();
 }
 
 void network::withSparseTrain(mat sample,mat result)
@@ -183,14 +179,10 @@ void network::withSparseTrain(mat sample,mat result)
         for(int i=layer_num;i>=1;i--){
             delta[i]=out[i-1].t()*e[i]/sample.n_rows;
             w[i]=w[i]-lr*delta[i];
-            //随机扰动
-            rdmat[i]=w[i];
-            rdmat[i].randu();
-            rdmat[i]=(2*rdmat[i]-1)*rnd_scale;
-            w[i]=w[i]+rdmat[i];
             //偏置修改
             o[i]=o[i]-sum(e[i])/sample.n_rows;
         }
+        weightRndChange();
     }
 }
 
@@ -198,9 +190,9 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
     int time=0;
     //上一轮训练下来的误差
     double round_error;
-    mat error2;
+    mat serror;
     //赋值训练最小误差为较大的数
-    min_error=255;
+    min_error=DBL_MAX;
     //样本的输入和输出
     rowvec sample,out;
     while(time<MAX_TRAINNING_TIME)
@@ -223,8 +215,8 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
             }
         }
         updateOut(dataset.cols(0,in_vec-1));
-        error2=dataset.cols(in_vec,dataset.n_cols-1)-output;
-        round_error=norm(sum(error2%error2/dataset.n_rows),2);
+        serror=dataset.cols(in_vec,dataset.n_cols-1)-output;
+        round_error=norm(sum(serror%serror/dataset.n_rows),2);
         time++;
         if(round_error<min_error)
         {
@@ -235,7 +227,7 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
                 mo[i]=o[i];
             }
         }
-        if(time%10==0)
+        if(time%SHOW_TIME==0)
             cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
         if(round_error<tor_error)
         {
@@ -248,12 +240,12 @@ void network::datasetOnLineTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNIN
 
 void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_TIME,int bat_size) {
     int time=0;
-    //上一轮训练下来的误差
+    //训练下来的误差
     double round_error;
-    mat error2;
+    mat serror;
     //样本的输入和输出
     mat sample,out;
-    min_error=255;
+    min_error=DBL_MAX;
     int chunks,remain,start,end;
     chunks=dataset.n_rows/bat_size;
     remain=dataset.n_rows%bat_size;
@@ -294,8 +286,8 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
             }
         }
         updateOut(dataset.cols(0,in_vec-1));
-        error2=dataset.cols(in_vec,dataset.n_cols-1)-output;
-        round_error=norm(sum(error2%error2/dataset.n_rows),2);
+        serror=dataset.cols(in_vec,dataset.n_cols-1)-output;
+        round_error=norm(sum(serror%serror/dataset.n_rows),2);
         time++;
         if(round_error<min_error)
         {
@@ -306,7 +298,7 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
                 mo[i]=o[i];
             }
         }
-        if(time%10==0)
+        if(time%SHOW_TIME==0)
             cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
         if(round_error<tor_error)
         {
@@ -315,6 +307,100 @@ void network::datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_T
         }
     }
     cout<<"本次训练了"<<time<<"次，最小训练误差为"<<min_error<<endl<<"最终训练误差为"<<round_error<<endl;
+}
+
+void network::batStructLearningBySparse(mat dataset,int MAX_TRAINNING_TIME,int bat_size){
+    int time=0;
+    //一轮下来的误差
+    double round_error;
+    //误差数组
+    mat serror;
+    min_error=DBL_MAX;
+    int chunks,remain,start,end;
+    chunks=dataset.n_rows/bat_size;
+    remain=dataset.n_rows%bat_size;
+    while(time<MAX_TRAINNING_TIME){
+        for(int i=0;i<chunks;i++)
+        {
+            start=i*bat_size;
+            end=(i+1)*bat_size-1;
+            withSparseTrain(dataset.rows(start,end),dataset.rows(start,end));
+        }
+        //剩下的样本训练
+        if(remain!=0){
+            start=chunks*bat_size;
+            end=dataset.n_rows-1;
+            withSparseTrain(dataset.rows(start,end),dataset.rows(start,end));
+        }
+        updateOut(dataset);
+        serror=dataset-output;
+        round_error=norm(sum(serror%serror/dataset.n_rows),2);
+        time++;
+        if(round_error<min_error)
+        {
+            min_error=round_error;
+            for(int i=layer_num;i>=1;i--)
+            {
+                mw[i]=w[i];
+                mo[i]=o[i];
+            }
+        }
+        if(time%SHOW_TIME==0)
+            cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
+        if(round_error<tor_error)
+        {
+            error=round_error;
+            break;
+        }
+    }
+}
+
+void network::structLearningBySparse(mat dataset,int MAX_TRAINNING_TIME){
+    int time=0;
+    //上一轮训练下来的误差
+    double round_error;
+    mat serror;
+    //赋值训练最小误差为较大的数
+    min_error=DBL_MAX;
+    while(time<MAX_TRAINNING_TIME)
+    {
+        round_error=0;
+        for(int i=0;i<dataset.n_rows;i++)
+        {
+            withSparseTrain(dataset.row(i),dataset.row(i));
+        }
+        updateOut(dataset);
+        serror=dataset-output;
+        round_error=norm(sum(serror%serror/dataset.n_rows),2);
+        time++;
+        if(round_error<min_error)
+        {
+            min_error=round_error;
+            for(int i=layer_num;i>=1;i--)
+            {
+                mw[i]=w[i];
+                mo[i]=o[i];
+            }
+        }
+        if(time%SHOW_TIME==0)
+            cout<<"第"<<time<<"次训练的误差变化为"<<setprecision(50)<<round_error<<endl;
+        if(round_error<tor_error)
+        {
+            error=round_error;
+            break;
+        }
+    }
+    cout<<"本次训练了"<<time<<"次，最小训练误差为"<<min_error<<endl<<"最终训练误差为"<<round_error<<endl;
+}
+
+void network::weightRndChange(){
+    mat rdmat[MAX_LAYER];
+    for(int i=layer_num-1;i>=1;i--){
+        rdmat[i]=w[i];
+        rdmat[i].randu();
+        rdmat[i]=(2*rdmat[i]-1)*rnd_scale;
+        w[i]=w[i]+rdmat[i];
+    }
 }
 
 network::~network()

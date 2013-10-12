@@ -93,6 +93,14 @@ public:
     //MAX_TRAINNING_TIME是最多训练次数
     //bat_size批大小,当bat_size=1时变成在线训练……
     void datasetBatTrain(mat dataset,int TRAINNING_TYPE,int MAX_TRAINNING_TIME,int bat_size=1);
+    //利用稀疏训练学习数据集中的数据结构
+    //批训练
+    void batStructLearningBySparse(mat dataset,int MAX_TRAINNING_TIME,int bat_size=1);
+    //利用稀疏训练学习数据集中的数据结构
+    //在线训练
+    void structLearningBySparse(mat dataset,int MAX_TRAINNING_TIME);
+    //权值随机扰乱
+    void weightRndChange();
     virtual ~network();
 protected:
 private:

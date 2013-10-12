@@ -7,4 +7,6 @@
 //最大层数(需要+1)
 #define MAX_LAYER 4
 #define SAVE_FORM raw_ascii
+//多少次训练显示一次误差
+#define SHOW_TIME 10
 #endif // COMMON_H_INCLUDED
